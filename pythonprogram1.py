@@ -1,24 +1,34 @@
+import os
 import certifi
 from pymongo import MongoClient
 
+# Get URI from environment variable
+mongo_uri = os.environ.get("MONGO_URI")
+
+if not mongo_uri:
+    raise RuntimeError("MONGO_URI not set")
+
+# Connect to MongoDB
 client = MongoClient(
-    "mongodb+srv://py:sleepingjirachi@cluster0.vlvh7vg.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
+    mongo_uri,
     tlsCAFile=certifi.where()
 )
-db = client.my_database
-collection = db.my_collection
 
-# Insert multiple sample documents
-sample_data = [
-    {"name": "Jirachi", "type": "Steel", "level": 5},
-    {"name": "Pikachu", "type": "Electric", "level": 10},
-    {"name": "Bulbasaur", "type": "Grass", "level": 7},
-    {"name": "Charmander", "type": "Fire", "level": 8}
-]
+# Choose database and collection
+db = client.test_database
+collection = db.pokemon
 
-# Use insert_many to add all documents at once
-collection.insert_many(sample_data)
+# Insert test data
+data = {
+    "name": "Jirachi",
+    "type": "Steel",
+    "level": 5
+}
 
-# Query and print all documents to verify
+result = collection.insert_one(data)
+
+print("Inserted document ID:", result.inserted_id)
+
+# Verify insert
 for doc in collection.find():
     print(doc)
