@@ -1,34 +1,26 @@
+from dotenv import load_dotenv
 import os
 import certifi
 from pymongo import MongoClient
 
-# Get URI from environment variable
-mongo_uri = os.environ.get("MONGO_URI")
+load_dotenv()
 
-if not mongo_uri:
-    raise RuntimeError("MONGO_URI not set")
+uri = os.getenv("MONGO_URI")
+if not uri:
+    raise RuntimeError("MONGO_URI not found")
 
-# Connect to MongoDB
 client = MongoClient(
-    mongo_uri,
+    uri,
+    tls=True,
     tlsCAFile=certifi.where()
 )
 
-# Choose database and collection
-db = client.test_database
-collection = db.pokemon
+db = client["test_db"]
+collection = db["pokemon"]
 
-# Insert test data
-data = {
+collection.insert_one({
     "name": "Jirachi",
-    "type": "Steel",
-    "level": 5
-}
+    "type": "Steel"
+})
 
-result = collection.insert_one(data)
-
-print("Inserted document ID:", result.inserted_id)
-
-# Verify insert
-for doc in collection.find():
-    print(doc)
+print("Data inserted!")
